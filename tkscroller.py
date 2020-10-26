@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import ttk
 from PIL import Image, ImageTk
 from pprint import pprint
-from nekoslifetk import NekosLifeTk
+from scroller import NekosLifeScroller
 import math
 
 class ImageDisplay(Frame):
@@ -109,7 +109,7 @@ def key_pressed(event: Event):
         update_display()
         
 
-nl = NekosLifeTk()
+nl = NekosLifeScroller()
 nl.get_images_ready('sfw','img','cat')
 
 W,H = 400,400

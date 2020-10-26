@@ -1,7 +1,7 @@
 from nekoslife import NekosLife
 import os
 
-class NekosLifeTk(NekosLife):
+class NekosLifeScroller(NekosLife):
     MAXIMUM_TRASH_FILES = 32
     current_image = None
     temp_copy_folder = '.temp/.trash'
