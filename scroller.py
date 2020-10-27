@@ -2,14 +2,15 @@ from nekoslife import NekosLife
 import os,time
 
 class NekosLifeScroller(NekosLife):
-    MAX_HISTORY_LEN = 32
-    file_tracker = []
-    file_tracker_ptr = 0 # points at current position
+    MAX_IMAGES = 60
+    current_image = None
     
-    def __init__(self):
-        super().__init__('.temp')
+    def __init__(self,*args,**kwargs):
+        super().__init__('.temp',*args,**kwargs)
 
-        file_tracker = self.listdir()
+        files = self.listdir()
+        if len(files) > 0:
+            self.current_image = files[0]
     
     def listdir(self):
         """
@@ -21,77 +22,62 @@ class NekosLifeScroller(NekosLife):
                 continue
             path = os.path.join(self.save_folder,i)
             if os.path.isfile(path):
-                files.append(i)
+                files.append(path)
         
         return files
-    
-    @property
-    def current_image(self):
-        return self.file_tracker[self.file_tracker_ptr]
 
-    def get_planned_images(self):
-        """
-        Returns amount of images that are downloaded (planned for download).
-        """
-        return len(self.file_tracker) - self.file_tracker_ptr
-    
-    def delete_unused_images(self):
-        if self.file_tracker_ptr > self.MAX_HISTORY_LEN:
-            os.remove(self.file_tracker[-1])
-            self.file_tracker_ptr -= 1
-
-    def put_into_dlqueue(self,urldata):
-        self.file_tracker.append(urldata[1]) #path
-        self.delete_unused_images()
-        self.dlqueue.put(urldata)
 
     def get_images_ready(self,imgtype: str, imgformat: str, imgcategory: str):
         """
         Downloads new images if less then half left.
         """
-        if self.get_planned_images() < self.MAX_IMAGE_COUNT//2:
+        if len(self.listdir())+self.dlqueue.qsize() < self.MAX_IMAGES:
             urls = self.get_images(imgtype,imgformat,imgcategory)
             self.add_to_dlqueue(urls)
-
-    def get_downloaded(self):
-        """
-        Returns all downloaded images, deletes unexpected ones.
-        """
-        a = set(self.file_tracker)
-        b = self.listdir()
-        a.
-
-        return
+            return urls
 
     def wait_until_image_avalible(self,amount=1):
         """
         Wait until there's an image in the save folder.
         """
         while len(self.listdir()) < amount:
-            if self.get_planned_images() < amount:
+            if self.dlqueue.empty():
                 raise Exception('No images planned for download, please run `get_images_ready` first')
-
+    
+    def get_current_image(self):
+        return self.current_image,os.path.split(self.current_image)[1]
+    
     def get_next_image(self):
         """
         Returns path and filename of next image.
         If there is no file, waits for download workers to download new ones.
         """
-        self.wait_until_image_avalible(1)
-        self.file_tracker_ptr += 1
+        self.wait_until_image_avalible(2)
         
-        filename = os.path.split(self.current_image)[1]
+        if self.current_image is not None:
+            os.remove(self.current_image)
+        self.current_image = self.listdir()[0]
 
-        return filename,self.current_image
+        filename = os.path.split(self.current_image)[1]
+        
+        return self.current_image,filename
+        
 
     def reset_session(self,new_session):
         """
         Removes all files in temp and trash, the downloads new ones.
         """
-        for path in self.file_tracker:
-            os.remove(path)
+        for path in os.listdir(self.save_folder):
+            os.remove(os.path.join(self.save_folder,path))
 
-        file_tracker_ptr = 0
+        self.empty_dlqueue()
         
-        self.get_images_ready(*new_session)
+        return self.new_session(new_session)
+
+    def new_session(self,session):
+        self.get_images_ready(*session)
+        self.current_image = None
+        self.current_image = self.get_next_image()[0]
         
         return True
+        

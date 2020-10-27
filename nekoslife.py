@@ -40,7 +40,7 @@ class NekosLife:
             os.makedirs(self.save_folder)
             
         if generate_endpoints:
-            self.endpoints = self.get_endpoints()
+            self.get_endpoints()
 
     def get_endpoints(self,force=False) -> dict:
         """
@@ -56,6 +56,8 @@ class NekosLife:
                 url = self.IMAGES_URL+i+'/'+j+'/'
                 data = requests.get(url).json()['data']
                 endpoints[i][j] = data['response']['categories']
+        
+        self.endpoints = endpoints
         
         return endpoints
 
@@ -74,13 +76,6 @@ class NekosLife:
         
         return urls
 
-    def put_into_dlqueue(self,urldata):
-        """
-        Rewritable function.
-        Adds data to dlqueue.
-        """
-        self.dlqueue.put(urldata)
-
     def add_to_dlqueue(self,urls):
         """
         Adds urls to self.dlqueue.
@@ -89,7 +84,7 @@ class NekosLife:
         for url in urls:
             urldata = self.url_to_imagedata(url)
             if self.should_enqueue(*urldata):
-                self.put_into_dlqueue(urldata)
+                self.dlqueue.put(urldata)
     
     def url_to_imagedata(self,url):
         """
@@ -115,6 +110,11 @@ class NekosLife:
         """
         urls = self.get_images(imgtype,imgformat,imgcategory)
         self.add_to_dlqueue(urls)
+        
+    def empty_dlqueue(self):
+        while not self.dlqueue.empty():
+            self.dlqueue.get()
+            self.dlqueue.task_done()
 
     def download_url(self,url,path,dlpath=None):
         """
@@ -127,6 +127,8 @@ class NekosLife:
             for chunk in r.iter_content(self.CHUNK_SIZE):
                 file.write(chunk)
         os.rename(dlpath,path)
+        
+        return True # for now always returns True
 
     def download_worker(self):
         """
