@@ -74,6 +74,13 @@ class NekosLife:
         
         return urls
 
+    def put_into_dlqueue(self,urldata):
+        """
+        Rewritable function.
+        Adds data to dlqueue.
+        """
+        self.dlqueue.put(urldata)
+
     def add_to_dlqueue(self,urls):
         """
         Adds urls to self.dlqueue.
@@ -82,7 +89,7 @@ class NekosLife:
         for url in urls:
             urldata = self.url_to_imagedata(url)
             if self.should_enqueue(*urldata):
-                self.dlqueue.put(urldata)
+                self.put_into_dlqueue(urldata)
     
     def url_to_imagedata(self,url):
         """

@@ -120,6 +120,7 @@ ctg_chooser = CategoryChooser(root)
 image_display = ImageDisplay(root)
 
 ctg_chooser.update_category(reset=False)
+ctg_chooser.imgcategory.set("cat")
 ctg_chooser.grid(row=0)
 
 image_display.update_resolution(W,H)
