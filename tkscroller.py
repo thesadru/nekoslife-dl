@@ -117,9 +117,9 @@ def key_pressed(event):
         nekoslife.get_images_ready(*category_chooser.get_category())
         image_display.update_display(*nekoslife.get_next_image())
 
-def update_remaining():
+def update_loaded():
     category_chooser.loaded.configure(text=f'\tloaded images: {len(nekoslife.listdir())}')
-    root.after(500,update_remaining)
+    root.after(500,update_loaded)
 
 nekoslife = NekosLifeScroller()
 
@@ -135,7 +135,7 @@ image_display.update_resolution(W,H)
 image_display.grid(row=1)
 
 reset_session()
-update_remaining()
+update_loaded()
 
 root.bind('<Key>',key_pressed)
 root.mainloop()
