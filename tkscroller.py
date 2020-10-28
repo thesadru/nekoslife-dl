@@ -113,7 +113,6 @@ def reset_session():
 
 def key_pressed(event):
     if event.keysym == "Right":
-        print(f"deleted {nekoslife.current_image}")
         nekoslife.get_images_ready(*category_chooser.get_category())
         image_display.update_display(*nekoslife.get_next_image())
 
@@ -121,21 +120,22 @@ def update_loaded():
     category_chooser.loaded.configure(text=f'\tloaded images: {len(nekoslife.listdir())}')
     root.after(500,update_loaded)
 
-nekoslife = NekosLifeScroller()
+if __name__ == '__main__':
+    nekoslife = NekosLifeScroller()
 
-W,H = 400,400
-root = tk.Tk('nekos.life viewer')
-root.geometry(f'{W}x{H}')
+    W,H = 400,400
+    root = tk.Tk('nekos.life viewer')
+    root.geometry(f'{W}x{H}')
 
-category_chooser = CategoryChooser(root)
-category_chooser.grid(row=0)
+    category_chooser = CategoryChooser(root)
+    category_chooser.grid(row=0)
 
-image_display = ImageDisplay(root)
-image_display.update_resolution(W,H)
-image_display.grid(row=1)
+    image_display = ImageDisplay(root)
+    image_display.update_resolution(W,H)
+    image_display.grid(row=1)
 
-reset_session()
-update_loaded()
+    reset_session()
+    update_loaded()
 
-root.bind('<Key>',key_pressed)
-root.mainloop()
+    root.bind('<Key>',key_pressed)
+    root.mainloop()
