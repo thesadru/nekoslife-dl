@@ -207,11 +207,12 @@ class NekosLife:
     # =========================================================================
     # download workers
 
-    def download_url(self, url, path, dlpath=None):
+    def download_url(self, url, path, dlpath=None, special_filename=None):
         """
         Downloads a file and saves it to path.
         Dlpath will be the file path while still downloading.
-        Returns how long the download took. 0 if failed
+        Returns how long the download took. 0 if failed.
+        `special_filename` has no usage currently.
         """
         start = time.time()
         r = requests.get(url)
@@ -234,7 +235,7 @@ class NekosLife:
 
             try:
                 dlpath = path+'.000'
-                dl_time = self.download_url(url, path, dlpath)
+                dl_time = self.download_url(url, path, dlpath, filename)
                 self.update_estimated_time(dl_time)
             except (Exception, KeyboardInterrupt):
                 if os.path.isfile(dlpath):
@@ -299,6 +300,7 @@ class NekosLife:
         """
         Prints the progress bar.
         When `SHOW_PROGRESS_BAR` is False, doesn't print.
+        Time may go up and down if the CPU is slow.
         """
         if not self.SHOW_PROGRESS_BAR:
             return False
@@ -307,7 +309,7 @@ class NekosLife:
         planned_urls = self.dlqueue.qsize()
         urls = downloaded_urls + planned_urls
         current_time = round(time.time()-self.start_dl_time, 2)
-        estimated_time = round(self.estimated_time*urls, 2)
+        estimated_time = round(current_time+self.estimated_time*planned_urls, 2)
 
         print(
             self.PROGRESS_BAR.format(

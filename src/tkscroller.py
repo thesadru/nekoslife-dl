@@ -3,10 +3,8 @@ import time
 import tkinter as tk
 from pprint import pprint
 from tkinter import ttk
-
 from PIL import Image, ImageTk
-
-from scroller import NekosLifeScroller
+from nekoslife_dl import NekosLifeScroller
 
 
 class ImageDisplay(tk.Frame):

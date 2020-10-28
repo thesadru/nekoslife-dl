@@ -1,4 +1,4 @@
-from nekoslife import NekosLife
+from .nekoslife import NekosLife
 import os,time,random,threading
 
 class NekosLifeScroller(NekosLife):

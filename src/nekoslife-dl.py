@@ -1,4 +1,4 @@
-from nekoslife import NekosLife
+from nekoslife_dl import NekosLife
 import argparse
 import time
 __doc__ = """
