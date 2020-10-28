@@ -428,7 +428,7 @@ class NekosLife:
 
     def empty_dlqueue(self):
         """
-        Marks all tasks unstarted tasks as done.
+        Marks all unstarted tasks as done.
         """
         while not self.dlqueue.empty():
             self.dlqueue.get()

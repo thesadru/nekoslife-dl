@@ -121,7 +121,8 @@ def update_loaded():
     root.after(500,update_loaded)
 
 if __name__ == '__main__':
-    nekoslife = NekosLifeScroller()
+    print('INITIALIZING')
+    nekoslife = NekosLifeScroller(download_threads=3)
 
     W,H = 400,400
     root = tk.Tk('nekos.life viewer')
@@ -134,6 +135,7 @@ if __name__ == '__main__':
     image_display.update_resolution(W,H)
     image_display.grid(row=1)
 
+    print('GETTING IMAGES')
     reset_session()
     update_loaded()
 
