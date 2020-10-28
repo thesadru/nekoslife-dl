@@ -1,20 +1,11 @@
 from nekoslife import NekosLife
 import argparse
 import time
-
+__doc__ = """
+Downloads images from https://nekos.life.
+Has a progress bar and multi-threaded download.
 """
-need to define:
-
-__init__
-save_folder: str = 'images'
-download_threads: int = 1
-url_file: str = None
-sort_url_file: bool = False
-
-wait_until_finished 
-timeout: int = 60*60
-"""
-parser = argparse.ArgumentParser('nekoslife-dl')
+parser = argparse.ArgumentParser('nekoslife-dl',description=__doc__)
 
 parser.add_argument('type',choices=NekosLife.ENDPOINT_TYPES)
 parser.add_argument('format',choices=NekosLife.ENDPOINT_FORMATS)
