@@ -46,30 +46,30 @@ class ImageDisplay(tk.Frame):
         img = Image.open(imgpath)
         img = self.resize_img(img)
         img = ImageTk.PhotoImage(img)
-        
-        self.update_resolution(root.winfo_width(),root.winfo_height())
 
         self.label.configure(text=filename, image=img)
         self.label.image = img
 
     def update_resolution(self, maxwidth, maxheight):
         self.MAXWIDTH = maxwidth
-        self.MAXHEIGHT = maxheight-12-self.fontsize-category_chooser.winfo_height()
+        self.MAXHEIGHT = maxheight-60 # other widgets take up some space
 
 class CategoryChooser(tk.Frame):
     RESET_ON_CHANGE = True
-    def __init__(self, master):
+    def __init__(self, master, endpoint_types, endpoint_formats, endpoints):
         super().__init__(master)
-            
+        
+        self.endpoints = endpoints
+        
         self.imgtype     = tk.StringVar()
         self.imgformat   = tk.StringVar()
         self.imgcategory = tk.StringVar()
         
         
         self.omtype      = ttk.OptionMenu(self,self.imgtype,'sfw',
-                                          *nekoslife.ENDPOINT_TYPES,command=self.update_category)
+                                          *endpoint_types,command=self.update_category)
         self.omformat    = ttk.OptionMenu(self,self.imgformat,'img',
-                                          *nekoslife.ENDPOINT_FORMATS,command=self.update_category)
+                                          *endpoint_formats,command=self.update_category)
         self.omcategory  = ttk.OptionMenu(self,self.imgcategory,'cat',
                                           *self.get_category_endpoints(),command=self.reset_session)
         
@@ -83,8 +83,7 @@ class CategoryChooser(tk.Frame):
         self.loaded.grid(column=3,row=0,sticky='e')
     
     def get_category_endpoints(self):
-        endpoints = nekoslife.get_endpoints()
-        return endpoints[self.imgtype.get()][self.imgformat.get()]
+        return self.endpoints[self.imgtype.get()][self.imgformat.get()]
     
     def get_category(self):
         return self.imgtype.get(),self.imgformat.get(),self.imgcategory.get()
@@ -101,18 +100,22 @@ class CategoryChooser(tk.Frame):
         print('RESETING SESSION to',event)
         reset_session()
 
+def update_display(imagedata):
+    image_display.update_resolution(root.winfo_width(),root.winfo_height())
+    image_display.update_display(*imagedata)
+    
 def new_session():
     nekoslife.new_session(category_chooser.get_category())
-    image_display.update_display(*nekoslife.get_current_image())
+    update_display(nekoslife.get_current_image())
 
 def reset_session():
     nekoslife.reset_session(category_chooser.get_category())
-    image_display.update_display(*nekoslife.get_current_image())
+    update_display(nekoslife.get_current_image())
 
 def key_pressed(event):
     if event.keysym == "Right":
         nekoslife.get_images_ready(*category_chooser.get_category())
-        image_display.update_display(*nekoslife.get_next_image())
+        update_display(nekoslife.get_next_image())
 
 def update_loaded():
     category_chooser.loaded.configure(text=f'\tloaded images: {len(nekoslife.listdir())}')
@@ -125,8 +128,9 @@ if __name__ == '__main__':
     W,H = 400,400
     root = tk.Tk('nekos.life viewer')
     root.geometry(f'{W}x{H}')
-
-    category_chooser = CategoryChooser(root)
+    
+    category_chooser = CategoryChooser(root,
+        nekoslife.ENDPOINT_TYPES,nekoslife.ENDPOINT_FORMATS,nekoslife.get_endpoints())
     category_chooser.grid(row=0)
 
     image_display = ImageDisplay(root)

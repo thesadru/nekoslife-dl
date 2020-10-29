@@ -8,6 +8,8 @@ class NekosLifeScroller(NekosLife):
     
     Randomly gets a file from the `save_folder`.
     Needs a periodical download with `get_images_ready`
+    
+    Instead of using function returns, use `current_image`.
     """
     MAX_IMAGES = 60
     current_image = None
@@ -69,14 +71,15 @@ class NekosLifeScroller(NekosLife):
     def get_current_image(self):
         return self.current_image,os.path.split(self.current_image)[1]
     
-    def get_next_image(self):
+    def get_next_image(self,remove=True):
         """
         Returns path and filename of next image.
+        Automatically sets path as `current_image`.
         If there is no file, waits for download workers to download new ones.
         """
         self.wait_until_image_avalible(2)
         
-        if self.current_image is not None:
+        if remove and self.current_image is not None:
             os.remove(self.current_image)
         self.current_image = random.choice(self.listdir())
 
@@ -104,8 +107,7 @@ class NekosLifeScroller(NekosLife):
         self.get_images_ready(*session)
         self.wait_until_image_avalible()
         
-        self.current_image = None
-        self.current_image = self.get_next_image()[0]
+        self.get_next_image(remove=False)[0]
         
         return True
         
