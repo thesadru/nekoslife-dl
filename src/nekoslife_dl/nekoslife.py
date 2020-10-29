@@ -120,20 +120,27 @@ class NekosLife:
             imgtype: str, imgformat: str, imgcategory: str, amount: int,
             add_to_dlqueue: bool = False,
             use_url_file=False,
-            unique: int = 0):
+            unique: int = 0, use_expected_unique: bool = False,
+            expected_unique_leeway: int = 0):
         """
         Gets multiple images than is allowed by the API.
         If `add_to_dlqueue` is True, starts adding all the urls to dlqueue.
         If `use_url_file`, undownloaded urls will be downloaded and at the end of getting saved.
         If `unique` is <= 0, a list with random urls will be returned or lenght amount.
         Else a set of lenght:`lenght <= unique ± MAX_IMAGE_COUNT` will be returned.
+        In case you just want to get ALL the images, use `use_expected_unique`.
+        This will stop the program once the program gets \
+        `maximum_images - expected_unique_leeway` images.
         """
         if use_url_file:
             urls = self.get_urls_file()
             if add_to_dlqueue:
                 self.add_to_dlqueue(urls)
+
+            expected_unique = self.get_expected_unique(urls)
         else:
             urls = []
+            expected_unique = 0
 
         if unique <= 0:
             urls = set(urls)
@@ -151,8 +158,16 @@ class NekosLife:
                 self.add_to_dlqueue(new_urls)
             self.print_progress_bar()
 
+            expected_unique = self.get_expected_unique(new_urls,expected_unique)
+
             if len(urls) >= unique >= 0:
                 break
+            
+            elif (use_expected_unique and \
+                  len(urls) >= expected_unique - expected_unique_leeway
+            ):
+                break
+                
 
         if use_url_file:
             self.add_urls_file(set(urls))
@@ -438,6 +453,14 @@ class NekosLife:
         else:
             urls = len(os.listdir(self.save_folder))
             self.estimated_time = (urls*self.estimated_time+time)/(urls+1)
+
+    def get_expected_unique(self,urls,old_max=0):
+        m = old_max
+        for url in urls:
+            index = self.url_index(url)
+            if index > m:
+                m = index
+        return m
 
     # =========================================================================
     # static methods

@@ -36,6 +36,12 @@ download.add_argument('-c','--autocomplete','--complete',
     action='store_true',
     help="Autocompletes the missing images. Fairly slow since it has to test multiple urls."
 )
+download.add_argument('-e','--expected','--use-expected-unique',
+    type=int,
+    help="Uses expected unique. Which means that image getting will stop, \
+        once all the images will be gotten. The argument will be the leeway allowed. \
+        autostart recommended, so you can get ALL the images."
+)
 
 paths = parser.add_argument_group('paths')
 paths.add_argument('-f','--folder',
@@ -66,6 +72,9 @@ utility.add_argument('--update-file-every-url',
 
 args = parser.parse_args()
 
+if args.expected is not None:
+    args.unique = 0xffffffff
+
 nekoslife = NekosLife(
     args.folder, download_threads = args.threads, 
     progress_bar = not args.quiet,
@@ -77,7 +86,9 @@ urls = nekoslife.get_multiple_images(
     amount = args.amount,
     add_to_dlqueue = True,
     use_url_file = args.url_file is not None,
-    unique = args.unique)
+    unique = args.unique,
+    use_expected_unique = args.expected is not None,
+    expected_unique_leeway = args.expected)
 
 if args.autocomplete:
     nekoslife.autocomplete_urls(urls,
