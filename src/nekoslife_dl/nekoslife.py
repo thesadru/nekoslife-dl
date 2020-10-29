@@ -8,8 +8,8 @@ import threading
 import time
 from pprint import pprint
 from queue import Queue
-
 import requests
+from nekoslife_dl.errors import IllegalCategoryError
 
 
 class NekosLife:
@@ -106,7 +106,7 @@ class NekosLife:
 
         data = r.json()['data']
         if not data['status']['success']:
-            raise ValueError(
+            raise IllegalCategoryError(
                 'You must supply a proper category, check endpoints.')
         urls = data['response']['urls']
 
@@ -417,15 +417,15 @@ class NekosLife:
         Raises ValueError if category is invalid.
         """
         if imgtype not in self.ENDPOINT_TYPES:
-            raise ValueError('type must be in [%s]'
+            raise IllegalCategoryError('type must be in [%s]'
                              % ','.join(self.ENDPOINT_TYPES))
         if imgformat not in self.ENDPOINT_FORMATS:
-            raise ValueError('format must be in [%s]'
+            raise IllegalCategoryError('format must be in [%s]'
                              % ','.join(self.ENDPOINT_FORMATS))
 
         endpoints = self.get_endpoints()[imgtype][imgformat]
         if imgcategory not in endpoints:
-            raise ValueError(f'category for {imgtype}/{imgformat} must be in [%s]'
+            raise IllegalCategoryError(f'category for {imgtype}/{imgformat} must be in [%s]'
                              % ','.join(endpoints))
 
     def empty_dlqueue(self):
