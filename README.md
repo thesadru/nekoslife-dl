@@ -1,11 +1,11 @@
 # nekoslife-dl
-A wrapper for nekos.life. Allows download and browsing.
-<div align="center">
-  ![GitHub](https://img.shields.io/github/license/thesadru/nekoslife-dl)
-  ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/thesadru/nekoslife-dl)
-  ![GitHub last commit](https://img.shields.io/github/last-commit/thesadru/nekoslife-dl)
-  ![GitHub Release](https://img.shields.io/github/v/release/thesadru/nekoslife-dl?include_prereleases)
-</div>
+Downloads images from nekos.life using the v3 API. Allows downloading, browsing and saving. 
+
+![GitHub](https://img.shields.io/github/license/thesadru/nekoslife-dl)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/thesadru/nekoslife-dl)
+![GitHub last commit](https://img.shields.io/github/last-commit/thesadru/nekoslife-dl)
+![GitHub Release](https://img.shields.io/github/v/release/thesadru/nekoslife-dl?include_prereleases)
+
 
 # what's this project
 This project allows download from [nekos.life](https://nekos.life). Since the only avalible projects use api v2, I made my own that uses v3. It also allows viewing images.
