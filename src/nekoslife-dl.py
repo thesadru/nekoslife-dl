@@ -58,9 +58,9 @@ utility.add_argument('--sort-url-file',
     action='store_true',
     help="Sorts urls in the url file. No functionality."
 )
-utility.add_argument('--auto-url-complete',
+utility.add_argument('--update-file-every-url',
     action='store_true',
-    help="Adds a url every autocomplete, causes performance issues.."
+    help="Adds a url every autocomplete, causes performance issues."
 )
 
 
@@ -80,15 +80,10 @@ urls = nekoslife.get_multiple_images(
     unique = args.unique)
 
 if args.autocomplete:
-    args.auto_url_complete = args.auto_url_complete and args.url_file is not None
-    for url in nekoslife.autocomplete_urls(
+    nekoslife.autocomplete_urls(self,
         urls,
-        check_over=True,
-        yielding=True,
-        use_url_file=not args.auto_url_complete
-    ):
-        nekoslife.add_to_dlqueue(url)
-        if args.auto_url_complete:
-            nekoslife.add_urls_file(url)
+        add_to_dlqueue=True,
+        use_url_file=args.url_file is not None,
+        update_file_every_url=args.update_file_every_url)
 
 nekoslife.wait_until_finished(args.timeout)

@@ -123,7 +123,7 @@ class NekosLife:
             unique: int = 0):
         """
         Gets multiple images than is allowed by the API.
-        If `add_to_dlqueue` is True, starts adding all the urls to dlqueue,
+        If `add_to_dlqueue` is True, starts adding all the urls to dlqueue.
         If `use_url_file`, undownloaded urls will be downloaded and at the end of getting saved.
         If `unique` is <= 0, a list with random urls will be returned or lenght amount.
         Else a set of lenght:`lenght <= unique ± MAX_IMAGE_COUNT` will be returned.
@@ -259,14 +259,19 @@ class NekosLife:
         else:
             return ''
 
-    def autocomplete_urls(self,urls:set,yielding=False,sort=True,check_over=True,use_url_file=False):
+    def autocomplete_urls(self,
+            urls,
+            sort=True,check_over=True,
+            add_to_dlqueue=False,
+            use_url_file=False,update_file_every_url=False):
         """
         Enter an array of urls. If the images end in numbers, will return the complete url array.
         There must not be any copies, so entering a set is preffered.
         The urls will be sorted, if they are already sorted, set `sort` to False.
-        `yielding` starts yielding new urls instead of returning the complete array with old urls.
-       `check_over` looks if there are more urls over the highest index url.
+        `check_over` looks if there are more urls over the highest index url.
+        `add_to_dlqueue`  starts adding all the urls to dlqueue.
         If `use_url_file`, undownloaded urls will be downloaded and at the end of getting saved.
+        `update_file_every_url` saves url to file EVERY url, can cause performance issues.
         """
         if sort:
             urls = sorted(set(urls), key=self.url_index)
@@ -283,13 +288,12 @@ class NekosLife:
             url = self.should_autocomplete(urls[index],index+1,zeros)
             
             if url is None:
-                if yielding:
-                    return []
-                else:
-                    return urls # no more images
+                return urls # no more images
             elif url:
-                if yielding:
-                    yield url
+                if add_to_dlqueue:
+                    self.add_to_dlqueue((url))
+                if update_file_every_url:
+                    self.add_urls_file((url))
                 urls.insert(index,url) # insert the new url in the correct position
 
             index += 1
@@ -301,19 +305,17 @@ class NekosLife:
             if url is None:
                 break
             else:
-                if yielding:
-                    yield url
-                else:
-                    urls.append(url)
+                if add_to_dlqueue:
+                    self.add_to_dlqueue((url))
+                if update_file_every_url:
+                    self.add_urls_file((url))
+                urls.append(url)
             index += 1
 
-        if use_url_file:
+        if use_url_file and not update_file_every_url:
             self.add_urls_file(urls)
         
-        if yielding:
-            return []
-        else:
-            return urls
+        return urls
 
     # =========================================================================
     # download workers
