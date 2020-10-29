@@ -18,6 +18,9 @@ Either install with pip or place `src/nekoslife_dl` in your project. Then import
 run `python src/nekoslife-dl --help`. The documentation should print.
 ## tkscroller
 run `python src/tkscroller`. Then press the right arrow key to scroll to the next image. You can pick different images with the OptionMenus on top
+## tksorter
+run `python src/tksorter TRASHKEYSYM [KEYS]`. `TRASHKEYSYM` should be a symbol of a key that wil delete the current image, other keys will be in pairs like this: `KEYSYM DIRECTORY`.
+Example: `python .\src\tksorter.py Right z "images/liked" x "images/decent"`
 
 # TODO
 - code optimizations
