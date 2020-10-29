@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 from setuptools import setup,find_packages
+from shutil import copy
+from os.path import realpath,join
 
 with open('README.md', 'r') as f:
     long_description = f.read()
@@ -24,7 +26,7 @@ setup(
     ],
     python_requires='>=3.6',
     url='https://github.com/thesadru/nekoslife-dl',
-    keywords=['nekos','life','nekoslife','download','view','better','api','v3'],
+    keywords='nekos, life, nekoslife, download, dl, view, sort, better, api, v3'.split(', '),
     install_requires=install_requires,
     extras_require={},
     long_description=long_description,
