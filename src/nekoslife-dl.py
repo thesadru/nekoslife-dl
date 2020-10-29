@@ -80,8 +80,7 @@ urls = nekoslife.get_multiple_images(
     unique = args.unique)
 
 if args.autocomplete:
-    nekoslife.autocomplete_urls(self,
-        urls,
+    nekoslife.autocomplete_urls(urls,
         add_to_dlqueue=True,
         use_url_file=args.url_file is not None,
         update_file_every_url=args.update_file_every_url)
