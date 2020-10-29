@@ -136,27 +136,23 @@ class NekosLife:
             urls = []
 
         if unique <= 0:
-            for i in self._number_split(amount, self.MAX_IMAGE_COUNT):
-                new_urls = self.get_images(imgtype, imgformat, imgcategory, i)
-                urls.extend(new_urls)
-
-                if add_to_dlqueue:
-                    self.add_to_dlqueue(new_urls)
-                self.print_progress_bar()
-
-        else:
             urls = set(urls)
-            for i in self._number_split(amount, self.MAX_IMAGE_COUNT):
-                new_urls = self.get_images(imgtype, imgformat, imgcategory, i)
+
+        for i in self._number_split(amount, self.MAX_IMAGE_COUNT):
+            new_urls = self.get_images(imgtype, imgformat, imgcategory, i)
+
+            if unique <= 0:
                 new_urls = set(new_urls).difference(urls)
                 urls.update(new_urls)
+            else:
+                urls.extend(new_urls)
 
-                if add_to_dlqueue:
-                    self.add_to_dlqueue(new_urls)
-                self.print_progress_bar()
+            if add_to_dlqueue:
+                self.add_to_dlqueue(new_urls)
+            self.print_progress_bar()
 
-                if len(urls) >= unique:
-                    break
+            if len(urls) >= unique >= 0:
+                break
 
         if use_url_file:
             self.add_urls_file(set(urls))
@@ -245,7 +241,7 @@ class NekosLife:
         None if there's no url avalible and empty string if no url needs to be returned.
         `zeros` is how many zeros should be in the image
         """
-        if not re.match(self.PROPER_IMAGE_REGEX,url):
+        if not self.matches_regex(url):
             return None # url doesn't match regex, so stop looking
         
         index = self.url_index(url)
@@ -291,9 +287,9 @@ class NekosLife:
                 return urls # no more images
             elif url:
                 if add_to_dlqueue:
-                    self.add_to_dlqueue((url))
+                    self.add_to_dlqueue([url])
                 if update_file_every_url:
-                    self.add_urls_file((url))
+                    self.add_urls_file([url])
                 urls.insert(index,url) # insert the new url in the correct position
 
             index += 1
@@ -306,9 +302,9 @@ class NekosLife:
                 break
             else:
                 if add_to_dlqueue:
-                    self.add_to_dlqueue((url))
+                    self.add_to_dlqueue([url])
                 if update_file_every_url:
-                    self.add_urls_file((url))
+                    self.add_urls_file([url])
                 urls.append(url)
             index += 1
 
@@ -552,6 +548,9 @@ class NekosLife:
         while not self.dlqueue.empty():
             self.dlqueue.get()
             self.dlqueue.task_done()
+    
+    def matches_regex(self,url):
+        return bool(re.match(self.PROPER_IMAGE_REGEX,url))
 
 
 if __name__ == "__main__":
