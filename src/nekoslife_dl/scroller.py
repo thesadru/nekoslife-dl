@@ -1,5 +1,9 @@
-from .nekoslife import NekosLife
 import os,time,random,threading
+try:
+    from nekoslife import NekosLife
+except ImportError:
+    # I'm not dealing with this shit, god fucking damnit
+    from .nekoslife import NekosLife
 
 class NekosLifeScroller(NekosLife):
     """

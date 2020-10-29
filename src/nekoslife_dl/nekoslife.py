@@ -6,10 +6,11 @@ import json
 import os
 import threading
 import time
+import re
 from pprint import pprint
 from queue import Queue
+from math import inf
 import requests
-from nekoslife_dl.errors import IllegalCategoryError
 
 
 class NekosLife:
@@ -37,6 +38,9 @@ class NekosLife:
     IMAGES_URL = URL+'images/'
     GET_URL = IMAGES_URL+"{t}/{f}/{c}/?count={a}"
     CDN_URL = "https://cdn.nekos.life/v3/{t}/{f}/{c}/{i}"
+
+    IMG_EXTENSIONS = ('gif','png','jpg','jpeg') # gif is first in case of gif format
+    PROPER_IMAGE_REGEX = r".*_\d{1,4}\..{3,4}" # filename_index.extension
 
     PROGRESS_BAR = "\r[*] {d} / {u} images [{t} / {e}]"+' '*6
     start_dl_time = time.time()
@@ -99,14 +103,14 @@ class NekosLife:
         elif amount == 0:
             return 0
 
-        url = self.generate_image_url(imgtype, imgformat, imgcategory)
+        url = self.generate_image_url(imgtype, imgformat, imgcategory, amount)
         r = requests.get(url)
         if r.status_code != 200:
             return r.status_code
 
         data = r.json()['data']
         if not data['status']['success']:
-            raise IllegalCategoryError(
+            raise ValueError(
                 'You must supply a proper category, check endpoints.')
         urls = data['response']['urls']
 
@@ -203,6 +207,97 @@ class NekosLife:
                 return False
 
         return True
+
+    # =========================================================================
+    # autocomplete
+    def check_real_url(self,url) -> bool:
+        """
+        Checks if the status code is 200.
+        """
+        return requests.head(url).status_code == 200
+
+    def check_file_extensions(self,url_format,index,zeros):
+        """
+        Goes through possible img file extensions, returns the real one.
+        Returns None if none is real.
+        """
+        url,filename = os.path.split(url_format)
+        filename = filename.split('_')[0]
+        
+        index = str(index)
+        add_zeros = zeros-len(index)
+        if add_zeros >= 0:
+            index = '0'*add_zeros + index
+        
+        filename += f'_{index}.'
+        url = url+'/'+filename
+        
+        for e in self.IMG_EXTENSIONS:
+            check = url+e
+            if self.check_real_url(check):
+                return check
+        return None
+
+    def should_autocomplete(self,url,expected_index,zeros):
+        """
+        Looks at a url and expected index, then returns based off what should be there.
+        Returns (str)url if should autocomplete, \
+        None if there's no url avalible and empty string if no url needs to be returned.
+        `zeros` is how many zeros should be in the image
+        """
+        if not re.match(self.PROPER_IMAGE_REGEX,url):
+            return None # url doesn't match regex, so stop looking
+        
+        index = self.url_index(url)
+        
+        if index != expected_index:
+            url = self.check_file_extensions(url,expected_index,zeros)
+            if url is None:
+                return None
+            else:
+                return url
+        else:
+            return ''
+
+    def autocomplete_urls(self,urls:set,sort=True,check_over=True):
+        """
+        Enter an array of urls. If the images end in numbers, will return the complete url list.
+        There must not be any copies, so entering a set is preffered.
+        The urls will be sorted, if they are already sorted, set `sort` to False,
+       `check_over` looks if there are more urls over the highest index url.
+        """
+        if sort:
+            urls = sorted(set(urls), key=self.url_index)
+        
+        image_amount = self.url_index(urls[-1])
+        if image_amount == 0:
+            return urls
+        
+        zeros = sum(i.isdigit() for i in os.path.split(urls[0])[1])
+        
+        index = 0
+        while index < image_amount:
+            # the expected index is one more, since images start from 1
+            url = self.should_autocomplete(urls[index],index+1,zeros)
+            
+            if url is None:
+                return urls # no more images
+            elif url:
+                urls.insert(index,url) # insert the new url in the correct position
+
+            index += 1
+        
+        index += 1
+        # check for more over the max
+        while check_over:
+            url = self.check_file_extensions(urls[0],index,zeros)
+            if url is None:
+                break
+            else:
+                urls.append(url)
+            index += 1
+        
+        return urls
 
     # =========================================================================
     # download workers
@@ -345,7 +440,7 @@ class NekosLife:
             return f'{minutes}min {seconds}s'
 
     @staticmethod
-    def url_index(url):
+    def url_index(url) -> int:
         """
         Gets the number in the image filename.
         Useful for sorting or guessing missing images.
@@ -355,7 +450,11 @@ class NekosLife:
         for i in filename:
             if i.isdigit():
                 number += i
-        return int(number)
+
+        if number:
+            return int(number)
+        else:
+            return inf
 
     @staticmethod
     def _number_split(n, s):
@@ -417,15 +516,15 @@ class NekosLife:
         Raises ValueError if category is invalid.
         """
         if imgtype not in self.ENDPOINT_TYPES:
-            raise IllegalCategoryError('type must be in [%s]'
+            raise ValueError('type must be in [%s]'
                              % ','.join(self.ENDPOINT_TYPES))
         if imgformat not in self.ENDPOINT_FORMATS:
-            raise IllegalCategoryError('format must be in [%s]'
+            raise ValueError('format must be in [%s]'
                              % ','.join(self.ENDPOINT_FORMATS))
 
         endpoints = self.get_endpoints()[imgtype][imgformat]
         if imgcategory not in endpoints:
-            raise IllegalCategoryError(f'category for {imgtype}/{imgformat} must be in [%s]'
+            raise ValueError(f'category for {imgtype}/{imgformat} must be in [%s]'
                              % ','.join(endpoints))
 
     def empty_dlqueue(self):
