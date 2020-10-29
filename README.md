@@ -21,5 +21,4 @@ run `python src/tkscroller`. Then press the right arrow key to scroll to the nex
 
 # TODO
 - code optimizations
-- save files you want
 - viewing on web
