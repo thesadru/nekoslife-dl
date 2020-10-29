@@ -259,12 +259,14 @@ class NekosLife:
         else:
             return ''
 
-    def autocomplete_urls(self,urls:set,sort=True,check_over=True):
+    def autocomplete_urls(self,urls:set,yielding=False,sort=True,check_over=True,use_url_file=False):
         """
-        Enter an array of urls. If the images end in numbers, will return the complete url list.
+        Enter an array of urls. If the images end in numbers, will return the complete url array.
         There must not be any copies, so entering a set is preffered.
-        The urls will be sorted, if they are already sorted, set `sort` to False,
+        The urls will be sorted, if they are already sorted, set `sort` to False.
+        `yielding` starts yielding new urls instead of returning the complete array with old urls.
        `check_over` looks if there are more urls over the highest index url.
+        If `use_url_file`, undownloaded urls will be downloaded and at the end of getting saved.
         """
         if sort:
             urls = sorted(set(urls), key=self.url_index)
@@ -281,8 +283,13 @@ class NekosLife:
             url = self.should_autocomplete(urls[index],index+1,zeros)
             
             if url is None:
-                return urls # no more images
+                if yielding:
+                    return []
+                else:
+                    return urls # no more images
             elif url:
+                if yielding:
+                    yield url
                 urls.insert(index,url) # insert the new url in the correct position
 
             index += 1
@@ -294,10 +301,19 @@ class NekosLife:
             if url is None:
                 break
             else:
-                urls.append(url)
+                if yielding:
+                    yield url
+                else:
+                    urls.append(url)
             index += 1
+
+        if use_url_file:
+            self.add_urls_file(urls)
         
-        return urls
+        if yielding:
+            return []
+        else:
+            return urls
 
     # =========================================================================
     # download workers

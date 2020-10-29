@@ -32,6 +32,10 @@ download.add_argument('--timeout',
     default=60*60,
     help="How many seconds to wait until release lock, if download is taking too long."
 )
+download.add_argument('-c','--autocomplete','--complete',
+    action='store_true',
+    help="Autocompletes the missing images. Fairly slow since it has to test multiple urls."
+)
 
 paths = parser.add_argument_group('paths')
 paths.add_argument('-f','--folder',
@@ -40,7 +44,8 @@ paths.add_argument('-f','--folder',
 )
 paths.add_argument('-F','--url-file',
     default=None,
-    help="Uses a file to store all gotten urls. Can later read from it to save time."
+    help="Uses a file to store all gotten urls. Can later read from it to save time.\
+          They will be added only after url collecting ends."
 )
 
 utility = parser.add_argument_group('utility')
@@ -53,6 +58,10 @@ utility.add_argument('--sort-url-file',
     action='store_true',
     help="Sorts urls in the url file. No functionality."
 )
+utility.add_argument('--auto-url-complete',
+    action='store_true',
+    help="Adds a url every autocomplete, causes performance issues.."
+)
 
 
 args = parser.parse_args()
@@ -63,10 +72,23 @@ nekoslife = NekosLife(
     url_file = args.url_file, sort_url_file = args.sort_url_file)
 nekoslife.raise_for_category(args.type,args.format,args.category)
 
-nekoslife.get_multiple_images(
+urls = nekoslife.get_multiple_images(
     args.type,args.format,args.category,
     amount = args.amount,
     add_to_dlqueue = True,
     use_url_file = args.url_file is not None,
     unique = args.unique)
+
+if args.autocomplete:
+    args.auto_url_complete = args.auto_url_complete and args.url_file is None
+    for url in nekoslife.autocomplete_urls(
+        urls,
+        check_over=True,
+        yielding=True,
+        use_url_file=not args.auto_url_complete
+    ):
+        nekoslife.add_to_dlqueue(url)
+        if args.auto_url_complete:
+            nekoslife.add_url_file(url)
+
 nekoslife.wait_until_finished(args.timeout)
