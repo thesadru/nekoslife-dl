@@ -5,7 +5,6 @@ A wrapper for nekos.life. Allows download and browsing.
   ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/thesadru/nekoslife-dl)
   ![GitHub last commit](https://img.shields.io/github/last-commit/thesadru/nekoslife-dl)
   ![GitHub Release](https://img.shields.io/github/v/release/thesadru/nekoslife-dl?include_prereleases)
-  [![Run on Repl.it](https://repl.it/badge/github/thesadru/nekoslife-dl)](https://repl.it/github/thesadru/nekoslife-dl)
 </div>
 
 # what's this project
