@@ -80,7 +80,7 @@ urls = nekoslife.get_multiple_images(
     unique = args.unique)
 
 if args.autocomplete:
-    args.auto_url_complete = args.auto_url_complete and args.url_file is None
+    args.auto_url_complete = args.auto_url_complete and args.url_file is not None
     for url in nekoslife.autocomplete_urls(
         urls,
         check_over=True,
@@ -89,6 +89,6 @@ if args.autocomplete:
     ):
         nekoslife.add_to_dlqueue(url)
         if args.auto_url_complete:
-            nekoslife.add_url_file(url)
+            nekoslife.add_urls_file(url)
 
 nekoslife.wait_until_finished(args.timeout)
