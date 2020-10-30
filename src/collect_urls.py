@@ -42,7 +42,7 @@ def collect(imgtype,imgformat,imgcategory):
         expected_unique_leeway = expected_unique_leeway
     )
     
-    autocomplete_urls(
+    nekoslife.autocomplete_urls(
         urls,
         use_url_file=True,
         update_file_every_url=True
