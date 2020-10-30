@@ -142,13 +142,17 @@ class NekosLife:
             urls = []
             expected_unique = 0
 
-        if unique <= 0:
+        if unique >= 0:
             urls = set(urls)
-
+        
         for i in self._number_split(amount, self.MAX_IMAGE_COUNT):
             new_urls = self.get_images(imgtype, imgformat, imgcategory, i)
+            if type(new_urls) == int:
+                if new_urls == 500:
+                    return [] # no images avalible
+                raise ConnectionError('Got status code',new_urls)
 
-            if unique <= 0:
+            if unique >= 0:
                 new_urls = set(new_urls).difference(urls)
                 urls.update(new_urls)
             else:
