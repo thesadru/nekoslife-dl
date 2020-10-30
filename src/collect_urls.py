@@ -33,13 +33,19 @@ def collect(imgtype,imgformat,imgcategory):
         sort_url_file = True
     )
     
-    nekoslife.get_multiple_images(
+    urls = nekoslife.get_multiple_images(
         imgtype,imgformat,imgcategory,
         amount = amount,
         use_url_file = True,
         unique = amount,
         use_expected_unique = True,
         expected_unique_leeway = expected_unique_leeway
+    )
+    
+    autocomplete_urls(
+        urls,
+        use_url_file=True,
+        update_file_every_url=True
     )
 
 def main():
