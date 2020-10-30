@@ -288,6 +288,9 @@ class NekosLife:
         If `use_url_file`, undownloaded urls will be downloaded and at the end of getting saved.
         `update_file_every_url` saves url to file EVERY url, can cause performance issues.
         """
+        if len(urls) == 0:
+            return [] # needs at least one url
+
         if sort:
             urls = sorted(set(urls), key=self.url_index)
         
